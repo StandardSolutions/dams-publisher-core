@@ -1,30 +1,30 @@
 -- Outbox table for the outbox pattern
 -- Version: 1.0
 -- Safe for concurrent execution
--- PostgreSQL compatible
+-- MySQL compatible
 
 -- Create schema version tracking table if not exists
 CREATE TABLE IF NOT EXISTS schema_version (
-    id SERIAL PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     version VARCHAR(50) NOT NULL,
-    applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     description TEXT
 );
 
 -- Create lock table for preventing concurrent initialization
 CREATE TABLE IF NOT EXISTS schema_initialization_lock (
     instance_id VARCHAR(255) PRIMARY KEY,
-    acquired_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    acquired_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create outbox table (IF NOT EXISTS handles concurrent execution)
 CREATE TABLE IF NOT EXISTS outbox_message (
-    id UUID PRIMARY KEY,
-    payload TEXT NOT NULL,
+    id CHAR(36) PRIMARY KEY,
+    payload LONGTEXT NOT NULL,
     type VARCHAR(255) NOT NULL,
     recipient VARCHAR(255) NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    processed_at TIMESTAMPTZ
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    processed_at TIMESTAMP NULL
 );
 
 -- Create indexes with IF NOT EXISTS
@@ -35,7 +35,6 @@ CREATE INDEX IF NOT EXISTS idx_outbox_unprocessed_recipient_type
 CREATE INDEX IF NOT EXISTS idx_outbox_processed_at
     ON outbox_message (processed_at);
 
--- Record schema version (ignore conflicts for concurrent execution)
-INSERT INTO schema_version (version, description) 
-VALUES ('1.0', 'Initial outbox_message table and indexes')
-ON CONFLICT DO NOTHING; 
+-- Record schema version (MySQL uses INSERT IGNORE for conflict handling)
+INSERT IGNORE INTO schema_version (version, description) 
+VALUES ('1.0', 'Initial outbox_message table and indexes'); 
