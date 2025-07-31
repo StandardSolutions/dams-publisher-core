@@ -3,12 +3,7 @@ package ru.standardsolutions.dams.publisher.core.initializer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -30,28 +25,12 @@ public class SchemaInitializer {
     private final DatabaseType databaseType;
     private final Map<String, String> lockSqlCache = new HashMap<>();
 
-    public enum DatabaseType {
-        POSTGRESQL, MYSQL, SQLSERVER, ORACLE, H2
-    }
-
     public SchemaInitializer(String jdbcUrl, String username, String password) {
         this.jdbcUrl = jdbcUrl;
         this.username = username;
         this.password = password;
         this.instanceId = UUID.randomUUID().toString();
-        this.databaseType = detectDatabaseType(jdbcUrl);
-    }
-
-    /**
-     * Определяет тип базы данных по JDBC URL
-     */
-    private DatabaseType detectDatabaseType(String jdbcUrl) {
-        if (jdbcUrl.contains("postgresql")) return DatabaseType.POSTGRESQL;
-        if (jdbcUrl.contains("mysql")) return DatabaseType.MYSQL;
-        if (jdbcUrl.contains("sqlserver") || jdbcUrl.contains("mssql")) return DatabaseType.SQLSERVER;
-        if (jdbcUrl.contains("oracle")) return DatabaseType.ORACLE;
-        if (jdbcUrl.contains("h2")) return DatabaseType.H2;
-        return DatabaseType.POSTGRESQL; // По умолчанию
+        this.databaseType = DatabaseType.ofJdbcUrl(jdbcUrl);
     }
 
     /**
