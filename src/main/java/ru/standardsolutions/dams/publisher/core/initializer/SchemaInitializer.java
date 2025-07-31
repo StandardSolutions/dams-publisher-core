@@ -7,6 +7,8 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class for initializing outbox schema in database.
@@ -16,6 +18,7 @@ import java.util.UUID;
  */
 public class SchemaInitializer {
 
+    private static final Logger logger = LoggerFactory.getLogger(SchemaInitializer.class);
     private static final String CURRENT_VERSION = "1.0";
 
     private final String jdbcUrl;
@@ -50,21 +53,21 @@ public class SchemaInitializer {
      * Performs outbox schema initialization with version checking and locking
      */
     public void initializeSchema() throws SQLException, IOException {
-        System.out.println("Starting outbox schema initialization...");
-        System.out.println("Instance ID: " + instanceId);
-        System.out.println("Database Type: " + databaseType);
+        logger.info("Starting outbox schema initialization...");
+        logger.info("Instance ID: {}", instanceId);
+        logger.info("Database Type: {}", databaseType);
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
             
             // Check if initialization is needed
             if (isSchemaUpToDate(connection)) {
-                System.out.println("✅ Schema is already up to date (version " + CURRENT_VERSION + "), initialization not required");
+                logger.info("✅ Schema is already up to date (version {}), initialization not required", CURRENT_VERSION);
                 return;
             }
             
             // Try to acquire lock
             if (!acquireLock(connection)) {
-                System.out.println("⏳ Another instance is performing initialization, waiting...");
+                logger.info("⏳ Another instance is performing initialization, waiting...");
                 waitForInitialization(connection);
                 return;
             }
@@ -73,7 +76,7 @@ public class SchemaInitializer {
                 // Perform initialization
                 String sqlScript = loadSchemaScript();
                 executeSchemaScript(connection, sqlScript);
-                System.out.println("✅ Outbox schema successfully initialized by instance " + instanceId);
+                logger.info("✅ Outbox schema successfully initialized by instance {}", instanceId);
                 
             } finally {
                 // Release lock
@@ -81,7 +84,7 @@ public class SchemaInitializer {
             }
             
         } catch (Exception e) {
-            System.err.println("❌ Error during outbox schema initialization: " + e.getMessage());
+            logger.error("❌ Error during outbox schema initialization: {}", e.getMessage(), e);
             throw e;
         }
     }
@@ -113,7 +116,7 @@ public class SchemaInitializer {
         try (PreparedStatement stmt = connection.prepareStatement(insertSql)) {
             stmt.setString(1, instanceId);
             stmt.executeUpdate();
-            System.out.println("🔒 Lock acquired by instance " + instanceId);
+            logger.info("🔒 Lock acquired by instance {}", instanceId);
             return true;
         } catch (SQLException e) {
             // Lock is already held by another instance
@@ -152,7 +155,7 @@ public class SchemaInitializer {
         try (PreparedStatement stmt = connection.prepareStatement(deleteSql)) {
             stmt.setString(1, instanceId);
             stmt.executeUpdate();
-            System.out.println("🔓 Lock released by instance " + instanceId);
+            logger.info("🔓 Lock released by instance {}", instanceId);
         }
     }
 
@@ -169,13 +172,13 @@ public class SchemaInitializer {
                 
                 // Check if initialization is completed
                 if (isSchemaUpToDate(connection)) {
-                    System.out.println("✅ Initialization completed by another instance");
+                    logger.info("✅ Initialization completed by another instance");
                     return;
                 }
                 
                 // Check if lock is stale (older than 5 minutes)
                 if (isLockStale(connection)) {
-                    System.out.println("⚠️ Stale lock detected, clearing...");
+                    logger.warn("⚠️ Stale lock detected, clearing...");
                     clearStaleLock(connection);
                     return;
                 }
@@ -308,21 +311,21 @@ public class SchemaInitializer {
             // Execute entire script as single transaction
             try (Statement statement = connection.createStatement()) {
                 statement.execute(sqlScript);
-                System.out.println("SQL script executed successfully");
+                logger.info("SQL script executed successfully");
             }
             
             // Commit transaction
             connection.commit();
-            System.out.println("✅ Transaction committed - all changes applied");
+            logger.info("✅ Transaction committed - all changes applied");
             
         } catch (SQLException e) {
             // Rollback transaction on error
             try {
                 connection.rollback();
-                System.err.println("❌ Transaction rolled back due to error: " + e.getMessage());
-                System.err.println("🔄 All changes cancelled - database remained in original state");
+                logger.error("❌ Transaction rolled back due to error: {}", e.getMessage());
+                logger.info("🔄 All changes cancelled - database remained in original state");
             } catch (SQLException rollbackEx) {
-                System.err.println("⚠️ Error during transaction rollback: " + rollbackEx.getMessage());
+                logger.error("⚠️ Error during transaction rollback: {}", rollbackEx.getMessage(), rollbackEx);
             }
             throw e;
         } finally {
