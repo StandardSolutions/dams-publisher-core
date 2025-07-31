@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ru.standard-solutions</groupId>
 	<artifactId>dams-publisher-core</artifactId>
-	<version>0.0.4</version>
+	<version>0.0.5</version>
 	<name>DAMs publisher core</name>
 	<description>Delivery-Assured Messages Publisher Core</description>
 	<url/>
@@ -18,6 +18,8 @@
 		<java.version>17</java.version>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 	<dependencies>
 	</dependencies>
