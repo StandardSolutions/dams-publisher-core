@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Класс для инициализации схемы outbox в базе данных.
- * Поддерживает PostgreSQL, MySQL, SQL Server, Oracle, H2.
- * Выполняет SQL скрипт создания таблицы и индексов.
- * Поддерживает проверку версии и блокировку для предотвращения одновременного выполнения.
+ * Class for initializing outbox schema in database.
+ * Supports PostgreSQL, MySQL, SQL Server, Oracle, H2.
+ * Executes SQL script for creating tables and indexes.
+ * Supports version checking and locking to prevent concurrent execution.
  */
 public class SchemaInitializer {
 
@@ -25,6 +25,19 @@ public class SchemaInitializer {
     private final DatabaseType databaseType;
     private final Map<String, String> lockSqlCache = new HashMap<>();
 
+    public enum DatabaseType {
+        POSTGRESQL, H2;
+
+        /**
+         * Determines database type from JDBC URL
+         */
+        public static DatabaseType ofJdbcUrl(String jdbcUrl) {
+            if (jdbcUrl.contains("postgresql")) return DatabaseType.POSTGRESQL;
+            if (jdbcUrl.contains("h2")) return DatabaseType.H2;
+            throw new UnsupportedDatabaseException("Unsupported database type. Supported types: PostgreSQL, H2. JDBC URL: " + jdbcUrl);
+        }
+    }
+
     public SchemaInitializer(String jdbcUrl, String username, String password) {
         this.jdbcUrl = jdbcUrl;
         this.username = username;
@@ -34,82 +47,82 @@ public class SchemaInitializer {
     }
 
     /**
-     * Выполняет инициализацию схемы outbox с проверкой версии и блокировкой
+     * Performs outbox schema initialization with version checking and locking
      */
     public void initializeSchema() throws SQLException, IOException {
-        System.out.println("Начинаем инициализацию схемы outbox...");
+        System.out.println("Starting outbox schema initialization...");
         System.out.println("Instance ID: " + instanceId);
         System.out.println("Database Type: " + databaseType);
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl, username, password)) {
             
-            // Проверяем, нужна ли инициализация
+            // Check if initialization is needed
             if (isSchemaUpToDate(connection)) {
-                System.out.println("✅ Схема уже актуальна (версия " + CURRENT_VERSION + "), инициализация не требуется");
+                System.out.println("✅ Schema is already up to date (version " + CURRENT_VERSION + "), initialization not required");
                 return;
             }
             
-            // Пытаемся получить блокировку
+            // Try to acquire lock
             if (!acquireLock(connection)) {
-                System.out.println("⏳ Другой экземпляр выполняет инициализацию, ожидаем...");
+                System.out.println("⏳ Another instance is performing initialization, waiting...");
                 waitForInitialization(connection);
                 return;
             }
             
             try {
-                // Выполняем инициализацию
+                // Perform initialization
                 String sqlScript = loadSchemaScript();
                 executeSchemaScript(connection, sqlScript);
-                System.out.println("✅ Схема outbox успешно инициализирована экземпляром " + instanceId);
+                System.out.println("✅ Outbox schema successfully initialized by instance " + instanceId);
                 
             } finally {
-                // Освобождаем блокировку
+                // Release lock
                 releaseLock(connection);
             }
             
         } catch (Exception e) {
-            System.err.println("❌ Ошибка при инициализации схемы outbox: " + e.getMessage());
+            System.err.println("❌ Error during outbox schema initialization: " + e.getMessage());
             throw e;
         }
     }
 
     /**
-     * Проверяет, актуальна ли схема
+     * Checks if schema is up to date
      */
     private boolean isSchemaUpToDate(Connection connection) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement(
                 "SELECT 1 FROM schema_version WHERE version = ?")) {
             stmt.setString(1, CURRENT_VERSION);
             try (ResultSet rs = stmt.executeQuery()) {
-                return rs.next(); // Схема актуальна, если версия найдена
+                return rs.next(); // Schema is up to date if version is found
             }
         } catch (SQLException e) {
-            // Таблица schema_version не существует - нужна инициализация
+            // schema_version table doesn't exist - initialization needed
             return false;
         }
     }
 
     /**
-     * Пытается получить блокировку для инициализации
+     * Attempts to acquire lock for initialization
      */
     private boolean acquireLock(Connection connection) throws SQLException {
-        // Создаем таблицу блокировки, если её нет
+        // Create lock table if it doesn't exist
         createLockTableIfNotExists(connection);
         
         String insertSql = getLockSql("insert");
         try (PreparedStatement stmt = connection.prepareStatement(insertSql)) {
             stmt.setString(1, instanceId);
             stmt.executeUpdate();
-            System.out.println("🔒 Блокировка получена экземпляром " + instanceId);
+            System.out.println("🔒 Lock acquired by instance " + instanceId);
             return true;
         } catch (SQLException e) {
-            // Блокировка уже занята другим экземпляром
+            // Lock is already held by another instance
             return false;
         }
     }
 
     /**
-     * Создает таблицу блокировки с учетом типа СУБД
+     * Creates lock table considering database type
      */
     private void createLockTableIfNotExists(Connection connection) throws SQLException {
         String createLockTable = loadCreateLockTableScript();
@@ -120,31 +133,31 @@ public class SchemaInitializer {
     }
 
     /**
-     * Загружает SQL скрипт для создания таблицы блокировки
+     * Loads SQL script for creating lock table
      */
     private String loadCreateLockTableScript() {
         try {
             String scriptPath = "/db/scripts/create_lock_table_" + databaseType.name().toLowerCase() + ".sql";
             return loadScript(scriptPath);
         } catch (IOException e) {
-            throw new RuntimeException("Не удалось загрузить SQL скрипт создания таблицы блокировки", e);
+            throw new RuntimeException("Failed to load SQL script for creating lock table", e);
         }
     }
 
     /**
-     * Освобождает блокировку
+     * Releases the lock
      */
     private void releaseLock(Connection connection) throws SQLException {
         String deleteSql = getLockSql("delete");
         try (PreparedStatement stmt = connection.prepareStatement(deleteSql)) {
             stmt.setString(1, instanceId);
             stmt.executeUpdate();
-            System.out.println("🔓 Блокировка освобождена экземпляром " + instanceId);
+            System.out.println("🔓 Lock released by instance " + instanceId);
         }
     }
 
     /**
-     * Ожидает завершения инициализации другим экземпляром
+     * Waits for initialization completion by another instance
      */
     private void waitForInitialization(Connection connection) throws SQLException {
         int maxWaitSeconds = 60;
@@ -154,30 +167,30 @@ public class SchemaInitializer {
             try {
                 Thread.sleep(waitIntervalMs);
                 
-                // Проверяем, завершилась ли инициализация
+                // Check if initialization is completed
                 if (isSchemaUpToDate(connection)) {
-                    System.out.println("✅ Инициализация завершена другим экземпляром");
+                    System.out.println("✅ Initialization completed by another instance");
                     return;
                 }
                 
-                // Проверяем, не зависла ли блокировка (старше 5 минут)
+                // Check if lock is stale (older than 5 minutes)
                 if (isLockStale(connection)) {
-                    System.out.println("⚠️ Обнаружена зависшая блокировка, очищаем...");
+                    System.out.println("⚠️ Stale lock detected, clearing...");
                     clearStaleLock(connection);
                     return;
                 }
                 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new SQLException("Ожидание прервано", e);
+                throw new SQLException("Waiting interrupted", e);
             }
         }
         
-        throw new SQLException("Таймаут ожидания инициализации (60 секунд)");
+        throw new SQLException("Initialization wait timeout (60 seconds)");
     }
 
     /**
-     * Проверяет, не зависла ли блокировка
+     * Checks if lock is stale
      */
     private boolean isLockStale(Connection connection) throws SQLException {
         String staleCheckSql = getLockSql("check_stale");
@@ -189,7 +202,7 @@ public class SchemaInitializer {
     }
 
     /**
-     * Очищает зависшую блокировку
+     * Clears stale lock
      */
     private void clearStaleLock(Connection connection) throws SQLException {
         String clearStaleSql = getLockSql("clear_stale");
@@ -199,7 +212,7 @@ public class SchemaInitializer {
     }
 
     /**
-     * Загружает SQL для операций с блокировкой из файла
+     * Loads SQL for lock operations from file
      */
     private String getLockSql(String operation) {
         String cacheKey = databaseType.name().toLowerCase() + "_" + operation;
@@ -210,7 +223,7 @@ public class SchemaInitializer {
                 String script = loadScript(scriptPath);
                 parseLockScript(script, lockSqlCache);
             } catch (IOException e) {
-                throw new RuntimeException("Не удалось загрузить SQL скрипт блокировки", e);
+                throw new RuntimeException("Failed to load SQL lock script", e);
             }
         }
         
@@ -218,7 +231,7 @@ public class SchemaInitializer {
     }
 
     /**
-     * Парсит SQL скрипт блокировки и извлекает нужные запросы
+     * Parses SQL lock script and extracts required queries
      */
     private void parseLockScript(String script, Map<String, String> cache) {
         String[] lines = script.split("\n");
@@ -257,14 +270,14 @@ public class SchemaInitializer {
             }
         }
         
-        // Добавляем последнюю операцию
+        // Add the last operation
         if (currentOperation != null) {
             cache.put(databaseType.name().toLowerCase() + "_" + currentOperation, currentSql.toString().trim());
         }
     }
 
     /**
-     * Загружает SQL скрипт из ресурсов приложения
+     * Loads SQL script from application resources
      */
     private String loadSchemaScript() throws IOException {
         String scriptPath = "/db/scripts/outbox_" + databaseType.name().toLowerCase() + "_schema.sql";
@@ -272,48 +285,48 @@ public class SchemaInitializer {
     }
 
     /**
-     * Загружает скрипт из ресурсов
+     * Loads script from resources
      */
     private String loadScript(String scriptPath) throws IOException {
         try (InputStream inputStream = getClass().getResourceAsStream(scriptPath)) {
             if (inputStream == null) {
-                throw new IOException("Не удалось найти файл скрипта: " + scriptPath);
+                throw new IOException("Failed to find script file: " + scriptPath);
             }
             return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
 
     /**
-     * Выполняет SQL скрипт создания схемы
+     * Executes SQL schema creation script
      */
     private void executeSchemaScript(Connection connection, String sqlScript) throws SQLException {
-        // Отключаем автокоммит для транзакционного выполнения
+        // Disable autocommit for transactional execution
         boolean autoCommit = connection.getAutoCommit();
         connection.setAutoCommit(false);
         
         try {
-            // Выполняем весь скрипт как одну транзакцию
+            // Execute entire script as single transaction
             try (Statement statement = connection.createStatement()) {
                 statement.execute(sqlScript);
-                System.out.println("SQL скрипт выполнен успешно");
+                System.out.println("SQL script executed successfully");
             }
             
-            // Коммитим транзакцию
+            // Commit transaction
             connection.commit();
-            System.out.println("✅ Транзакция зафиксирована - все изменения применены");
+            System.out.println("✅ Transaction committed - all changes applied");
             
         } catch (SQLException e) {
-            // Откатываем транзакцию при ошибке
+            // Rollback transaction on error
             try {
                 connection.rollback();
-                System.err.println("❌ Транзакция откачена из-за ошибки: " + e.getMessage());
-                System.err.println("🔄 Все изменения отменены - база данных осталась в исходном состоянии");
+                System.err.println("❌ Transaction rolled back due to error: " + e.getMessage());
+                System.err.println("🔄 All changes cancelled - database remained in original state");
             } catch (SQLException rollbackEx) {
-                System.err.println("⚠️ Ошибка при откате транзакции: " + rollbackEx.getMessage());
+                System.err.println("⚠️ Error during transaction rollback: " + rollbackEx.getMessage());
             }
             throw e;
         } finally {
-            // Восстанавливаем исходное состояние автокоммита
+            // Restore original autocommit state
             connection.setAutoCommit(autoCommit);
         }
     }
