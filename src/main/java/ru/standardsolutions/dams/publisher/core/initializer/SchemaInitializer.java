@@ -28,19 +28,6 @@ public class SchemaInitializer {
     private final DatabaseType databaseType;
     private final Map<String, String> lockSqlCache = new HashMap<>();
 
-    public enum DatabaseType {
-        POSTGRESQL, H2;
-
-        /**
-         * Determines database type from JDBC URL
-         */
-        public static DatabaseType ofJdbcUrl(String jdbcUrl) {
-            if (jdbcUrl.contains("postgresql")) return DatabaseType.POSTGRESQL;
-            if (jdbcUrl.contains("h2")) return DatabaseType.H2;
-            throw new UnsupportedDatabaseException("Unsupported database type. Supported types: PostgreSQL, H2. JDBC URL: " + jdbcUrl);
-        }
-    }
-
     public SchemaInitializer(String jdbcUrl, String username, String password) {
         this.jdbcUrl = jdbcUrl;
         this.username = username;
