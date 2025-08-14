@@ -1,12 +1,12 @@
 package ru.standardsolutions.dams.publisher.core.database;
 
-public enum DatabaseType {
+public enum DbType {
 
     POSTGRESQL("jdbc:postgresql"),
 
     H2("jdbc:h2");
 
-    DatabaseType(String value) {
+    DbType(String value) {
         this.value = value;
     }
 
@@ -18,7 +18,7 @@ public enum DatabaseType {
      * @param jdbcUrl jdbc url connection string.
      * @return DatabaseType enum.
      */
-    public static DatabaseType ofJdbcUrl(String jdbcUrl) {
+    public static DbType ofJdbcUrl(String jdbcUrl) {
         if (jdbcUrl.startsWith("jdbc:postgresql://")) return POSTGRESQL;
         if (jdbcUrl.startsWith("jdbc:h2://")) return H2;
         throw new UnsupportedDatabaseException("Supported Database Type: PostgreSQL, H2. jdbcUrl: " + jdbcUrl);

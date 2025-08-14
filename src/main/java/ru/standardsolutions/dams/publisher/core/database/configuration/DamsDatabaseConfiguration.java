@@ -1,19 +1,19 @@
 package ru.standardsolutions.dams.publisher.core.database.configuration;
 
-import ru.standardsolutions.dams.publisher.core.database.DatabaseType;
+import ru.standardsolutions.dams.publisher.core.database.DbType;
 
 public class DamsDatabaseConfiguration {
 
     private final String jdbcUrl;
     private final String username;
     private final String password;
-    private final DatabaseType databaseType;
+    private final DbType dbType;
 
     private DamsDatabaseConfiguration(Builder builder) {
         this.jdbcUrl = builder.jdbcUrl;
         this.username = builder.username;
         this.password = builder.password;
-        this.databaseType = builder.databaseType;
+        this.dbType = builder.dbType;
     }
 
     public String getJdbcUrl() {
@@ -28,8 +28,8 @@ public class DamsDatabaseConfiguration {
         return password;
     }
 
-    public DatabaseType getDatabaseType() {
-        return databaseType;
+    public DbType getDatabaseType() {
+        return dbType;
     }
 
     public static Builder builder() {
@@ -41,7 +41,7 @@ public class DamsDatabaseConfiguration {
         private String jdbcUrl;
         private String username;
         private String password;
-        private DatabaseType databaseType;
+        private DbType dbType;
 
         private Builder() {
         }
@@ -61,8 +61,8 @@ public class DamsDatabaseConfiguration {
             return this;
         }
 
-        public Builder databaseType(DatabaseType databaseType) {
-            this.databaseType = databaseType;
+        public Builder databaseType(DbType dbType) {
+            this.dbType = dbType;
             return this;
         }
 
