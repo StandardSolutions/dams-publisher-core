@@ -1,4 +1,4 @@
-package ru.standardsolutions.dams.publisher.core.database;
+package ru.standardsolutions.dams.publisher.core.data;
 
 public enum DbType {
 
