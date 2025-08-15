@@ -1,4 +1,4 @@
-package ru.standardsolutions.dams.publisher.core.database.init;
+package ru.standardsolutions.dams.publisher.core.data.init;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.standardsolutions.dams.publisher.core.database.UnsupportedDatabaseException;
 
 /**
  * Class for initializing outbox schema in database.
