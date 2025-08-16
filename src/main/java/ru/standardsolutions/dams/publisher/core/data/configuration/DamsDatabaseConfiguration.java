@@ -1,6 +1,6 @@
 package ru.standardsolutions.dams.publisher.core.data.configuration;
 
-import ru.standardsolutions.dams.publisher.core.data.DbType;
+import ru.standardsolutions.dams.publisher.core.data.database.DbType;
 
 public class DamsDatabaseConfiguration {
 

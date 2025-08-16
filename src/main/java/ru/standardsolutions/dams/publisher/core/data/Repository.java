@@ -1,4 +1,4 @@
 package ru.standardsolutions.dams.publisher.core.data;
 
-public interface DbScript {
+public interface Repository {
 }

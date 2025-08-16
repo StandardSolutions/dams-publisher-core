@@ -1,23 +1,25 @@
 package ru.standardsolutions.dams.publisher.core;
 
+import ru.standardsolutions.dams.publisher.core.data.migration.MigrationManager;
+import ru.standardsolutions.dams.publisher.core.data.database.DbInfo;
+import ru.standardsolutions.dams.publisher.core.data.database.DbType;
+import ru.standardsolutions.dams.publisher.core.data.database.JdbcDatabase;
+import ru.standardsolutions.dams.publisher.core.data.h2.DmH2;
+import ru.standardsolutions.dams.publisher.core.data.migration.postgresql.MmPostgreSQL;
+
 import javax.sql.DataSource;
+import java.util.Map;
 
 public record DamsPublisherCore(DataSource dataSource) {
 
     public void execute() {
-//       new DataMan(
-//          new DmCreateLockTable(checkLockTable, createLockTable),
-//          new DmLock(checkLockTable, createLockTable),
-//          new DmExecute(script1, script2),
-//          database
-
-//       ).execute()
-//        final DbScripts dbScripts = new DbScripts()
-//        database.executeSQL(dbScripts);
-//
-//                try (Connection conn = dataSource.getConnection()) {
-//            DatabaseMetaData metaData = conn.getMetaData();
-//            metaData.getDatabaseProductName();
-//        }
+        JdbcDatabase db = new JdbcDatabase(dataSource);
+        DbInfo dbInfo = db.info();
+        Map<DbType, MigrationManager> managerMap = Map.of(
+                DbType.POSTGRESQL, new MmPostgreSQL(),
+                DbType.H2, new DmH2()
+        );
+        MigrationManager migrationManager = managerMap.get(dbInfo.type());
+        migrationManager.execute();
     }
 }
