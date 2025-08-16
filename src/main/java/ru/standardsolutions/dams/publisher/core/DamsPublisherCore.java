@@ -15,11 +15,15 @@ public record DamsPublisherCore(DataSource dataSource) {
     public void execute() {
         JdbcDatabase db = new JdbcDatabase(dataSource);
         DbInfo dbInfo = db.info();
-        Map<DbType, MigrationManager> managerMap = Map.of(
-                DbType.POSTGRESQL, new MmPostgreSQL(),
-                DbType.H2, new DmH2()
-        );
-        MigrationManager migrationManager = managerMap.get(dbInfo.type());
-        migrationManager.execute();
+        
+        if (dbInfo.type() == DbType.H2) {
+            DmH2 h2Manager = new DmH2();
+            h2Manager.execute(dataSource);
+        } else if (dbInfo.type() == DbType.POSTGRESQL) {
+            MmPostgreSQL postgresManager = new MmPostgreSQL(dataSource);
+            postgresManager.execute();
+        } else {
+            throw new UnsupportedOperationException("Unsupported database type: " + dbInfo.type());
+        }
     }
 }
