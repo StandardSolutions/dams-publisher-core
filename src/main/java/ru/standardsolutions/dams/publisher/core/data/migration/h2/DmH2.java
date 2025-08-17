@@ -1,4 +1,4 @@
-package ru.standardsolutions.dams.publisher.core.data.h2;
+package ru.standardsolutions.dams.publisher.core.data.migration.h2;
 
 import ru.standardsolutions.dams.publisher.core.data.database.DataSourceException;
 import ru.standardsolutions.dams.publisher.core.data.migration.MigrationManager;

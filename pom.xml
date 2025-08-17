@@ -28,14 +28,22 @@
 			<version>2.0.17</version>
 		</dependency>
 		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>2.0.17</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>42.7.1</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
 			<version>5.1.0</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -72,37 +80,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<profile>
-			<id>test</id>
-			<dependencies>
-				<dependency>
-					<groupId>org.junit.jupiter</groupId>
-					<artifactId>junit-jupiter</artifactId>
-					<version>5.10.1</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.testcontainers</groupId>
-					<artifactId>junit-jupiter</artifactId>
-					<version>1.19.3</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>org.testcontainers</groupId>
-					<artifactId>postgresql</artifactId>
-					<version>1.19.3</version>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>ch.qos.logback</groupId>
-					<artifactId>logback-classic</artifactId>
-					<version>1.4.14</version>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-	</profiles>
-
 </project>
