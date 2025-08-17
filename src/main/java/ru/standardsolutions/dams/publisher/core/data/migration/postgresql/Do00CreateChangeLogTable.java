@@ -6,9 +6,9 @@ import ru.standardsolutions.dams.publisher.core.data.DatabaseVoidOperation;
 
 import java.sql.*;
 
-record Do01CreateChangeLogTable(Connection connection) implements DatabaseVoidOperation {
+record Do00CreateChangeLogTable(Connection connection) implements DatabaseVoidOperation {
 
-    private static final Logger logger = LoggerFactory.getLogger(Do01CreateChangeLogTable.class);
+    private static final Logger logger = LoggerFactory.getLogger(Do00CreateChangeLogTable.class);
 
     @Override
     public void execute(String... args) {
@@ -22,7 +22,7 @@ record Do01CreateChangeLogTable(Connection connection) implements DatabaseVoidOp
 
         String sqlCreateTable = """
                 CREATE TABLE IF NOT EXISTS %s (
-                    id VARCHAR(255),
+                    id VARCHAR(255) PRIMARY KEY,
                     description VARCHAR(255),
                     executed_date TIMESTAMP NOT NULL DEFAULT NOW()
                 )
@@ -31,8 +31,10 @@ record Do01CreateChangeLogTable(Connection connection) implements DatabaseVoidOp
             stmt.setString(1, schema);
             stmt.setString(2, tableName);
             boolean isExist = stmt.executeQuery().next();
-            logger.debug("Table={} in schema={} already exist", tableName, schema);
-            if (isExist) return;
+            if (isExist) {
+                logger.debug("Table={} in schema={} already exist", tableName, schema);
+                return;
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

@@ -57,6 +57,16 @@ class DamsPublisherCorePostgreSQLTest {
         // Выполняем основной метод
         assertDoesNotThrow(() -> damsPublisherCore.execute());
 
+        // Проверяем, что таблица recipient была создана
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(
+                "SELECT table_name FROM information_schema.tables " +
+                "WHERE table_name = 'recipient' AND table_schema = 'dams'"
+            );
+            assertTrue(resultSet.next(), "Table 'recipient' should be created");
+        }
+
 //        // Проверяем, что все необходимые таблицы были созданы
 //        try (Connection connection = dataSource.getConnection();
 //             Statement statement = connection.createStatement()) {
