@@ -25,23 +25,13 @@ record Do01CreateRecipientTable(Connection connection) implements DatabaseVoidOp
         try (PreparedStatement ps = connection.prepareStatement(sqlCheckMigration)) {
             ps.setString(1, migrationId);
             if (ps.executeQuery().next()) {
-                System.out.println("Migration '" + migrationId + "' already applied, skipping");
+                logger.debug("Migration {} already applied, skipping", migrationId);
                 return;
             }
         } catch (SQLException e) {
             throw new RuntimeException("Failed to check changelog table", e);
         }
-        String fullTableName = schema + "." + tableName;
-        String sqlCreateTable = """
-                CREATE TABLE IF NOT EXISTS %s (
-                    id VARCHAR(255) PRIMARY KEY,
-                    channel_type VARCHAR(64) NOT NULL,
-                    connection_params TEXT NOT NULL,
-                    description VARCHAR(255),
-                    enabled BOOLEAN default false,
-                    executed_date TIMESTAMP NOT NULL DEFAULT NOW()
-                )
-                """.formatted(fullTableName);
+        String sqlCreateTable = getString(schema, tableName);
         logger.info("Attempting to create table: {} in schema: {}", tableName, schema);
         logger.info("SQL for recipient table: {}", sqlCreateTable);
 
@@ -62,5 +52,19 @@ record Do01CreateRecipientTable(Connection connection) implements DatabaseVoidOp
         } catch (SQLException e) {
             throw new RuntimeException("Failed to insert changelog record", e);
         }
+    }
+
+    private static String getString(String schema, String tableName) {
+        String fullTableName = schema + "." + tableName;
+        return """
+                CREATE TABLE IF NOT EXISTS %s (
+                    id VARCHAR(255) PRIMARY KEY,
+                    channel_type VARCHAR(64) NOT NULL,
+                    connection_params TEXT NOT NULL,
+                    description VARCHAR(255),
+                    enabled BOOLEAN default false,
+                    executed_date TIMESTAMP NOT NULL DEFAULT NOW()
+                )
+                """.formatted(fullTableName);
     }
 }
