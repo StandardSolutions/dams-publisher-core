@@ -8,7 +8,7 @@ import ru.standardsolutions.dams.publisher.core.data.migration.postgresql.MmPost
 
 import javax.sql.DataSource;
 
-public record DamsPublisherCore(DataSource dataSource) {
+public record DamsPublisherCore(DataSource dataSource, String ...args) {
 
     public void execute() {
         JdbcDatabase db = new JdbcDatabase(dataSource);
