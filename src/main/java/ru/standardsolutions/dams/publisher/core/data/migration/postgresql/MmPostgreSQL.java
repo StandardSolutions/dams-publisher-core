@@ -13,7 +13,8 @@ public record MmPostgreSQL(DataSource dataSource) implements MigrationManager {
     public void execute() {
         try (Connection connection = dataSource.getConnection()) {
             new DoSetLock(connection).execute();
-            new Do01CreateChangeLogTable(connection).execute("dams", "dams_changelog");
+            new Do00CreateChangeLogTable(connection).execute("dams", "dams_changelog");
+            new Do01CreateRecipientTable(connection).execute("dams", "dams_recipient");
             new DoReleaseLock(connection).execute();
         } catch (SQLException e) {
             throw new DataSourceException(e);
@@ -24,24 +25,6 @@ public record MmPostgreSQL(DataSource dataSource) implements MigrationManager {
         try (Statement stmt = connection.createStatement()) {
             
 
-            // Создаем таблицу schema_initialization_lock
-            stmt.execute("""
-                CREATE TABLE IF NOT EXISTS schema_initialization_lock (
-                    instance_id VARCHAR(255) PRIMARY KEY,
-                    acquired_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-                )
-                """);
-            
-            // Создаем таблицу schema_version
-            stmt.execute("""
-                CREATE TABLE IF NOT EXISTS schema_version (
-                    id SERIAL PRIMARY KEY,
-                    description TEXT
-                    version VARCHAR(50) NOT NULL,
-                    applied_at TIMESTAMP NOT NULL DEFAULT NOW(),
-                )
-                """);
-            
             // Создаем таблицу outbox_message
             stmt.execute("""
                 CREATE TABLE IF NOT EXISTS outbox_message (
