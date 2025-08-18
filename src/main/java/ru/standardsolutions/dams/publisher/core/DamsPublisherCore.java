@@ -1,11 +1,9 @@
 package ru.standardsolutions.dams.publisher.core;
 
-import ru.standardsolutions.dams.publisher.core.data.database.DbType;
-import ru.standardsolutions.dams.publisher.core.data.database.JdbcDatabase;
-import ru.standardsolutions.dams.publisher.core.data.migration.h2.H2MigrationManager;
-import ru.standardsolutions.dams.publisher.core.data.migration.StandardMigrationManager;
-import ru.standardsolutions.dams.publisher.core.data.migration.postgresql.PostgreSQLMigrationLog;
-import ru.standardsolutions.dams.publisher.core.data.options.DataOptions;
+import ru.standardsolutions.dams.publisher.common.database.JdbcDatabase;
+import ru.standardsolutions.dams.publisher.common.migration.StandardMigrationManager;
+import ru.standardsolutions.dams.publisher.core.migration.postgresql.PostgreSQLMigrationLog;
+import ru.standardsolutions.dams.publisher.common.options.DataOptions;
 
 import javax.sql.DataSource;
 
