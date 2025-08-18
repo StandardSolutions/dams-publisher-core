@@ -1,6 +1,6 @@
 package ru.standardsolutions.dams.publisher.core.data.sanitized;
 
-import ru.standardsolutions.dams.publisher.core.data.SqlSanitized;
+import ru.standardsolutions.dams.publisher.core.data.Sanitized;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 /**
  * Immutable wrapper for sanitized SQL identifiers.
  */
-public final class SqlIdentifierSanitized implements SqlSanitized<String> {
+public final class SqlIdentifierSanitized implements Sanitized<String> {
 
     private final String rawValue;
 
@@ -37,7 +37,7 @@ public final class SqlIdentifierSanitized implements SqlSanitized<String> {
         }
 
         final String value = rawValue.replace("\"", "").replace("'", "").trim();
-        final Pattern ptn = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]*$");
+        final Pattern ptn = Pattern.compile("^[a-zA-Z_]\\w*$");
         if (!ptn.matcher(value).matches()) {
             throw new IllegalArgumentException(
                     String.format("Invalid SQL identifier: '%s'. Only [a-zA-Z0-9_] allowed", rawValue)
