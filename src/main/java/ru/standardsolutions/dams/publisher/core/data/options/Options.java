@@ -1,4 +1,4 @@
-package ru.standardsolutions.dams.publisher.core.data.shared;
+package ru.standardsolutions.dams.publisher.core.data.options;
 
 
 import java.util.*;
