@@ -1,8 +1,10 @@
 package ru.standardsolutions.dams.publisher.core.data;
 
-import ru.standardsolutions.dams.publisher.core.data.database.DbInfo;
+import ru.standardsolutions.dams.publisher.core.data.database.DbType;
 
 public interface Database {
 
-    DbInfo info();
+    DbType type();
+
+    String version();
 }

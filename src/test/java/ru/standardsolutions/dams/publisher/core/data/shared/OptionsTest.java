@@ -25,18 +25,22 @@ class OptionsTest {
         TestOptions(Iterable<String> args) {
             super(args);
         }
+
+        Map<String, String> options() {
+            return this.map;
+        }
     }
 
     @Test
     void constructor_withNullArray_createsEmptyMap() {
         TestOptions options = new TestOptions((String[]) null);
-        assertTrue(options.map.isEmpty());
+        assertTrue(options.options().isEmpty());
     }
 
     @Test
     void constructor_withNullIterable_createsEmptyMap() {
         TestOptions options = new TestOptions((Iterable<String>) null);
-        assertTrue(options.map.isEmpty());
+        assertTrue(options.options().isEmpty());
     }
 
     @ParameterizedTest
@@ -44,14 +48,14 @@ class OptionsTest {
     @ValueSource(strings = {" ", "\t", "\n"})
     void asMap_ignoresNullOrBlankArguments(String arg) {
         TestOptions options = new TestOptions(arg, "--valid=test");
-        assertEquals(1, options.map.size());
-        assertEquals("test", options.map.get("valid"));
+        assertEquals(1, options.options().size());
+        assertEquals("test", options.options().get("valid"));
     }
 
     @Test
     void asMap_handlesEmptyArguments() {
         TestOptions options = new TestOptions();
-        assertTrue(options.map.isEmpty());
+        assertTrue(options.options().isEmpty());
     }
 
     @Test
@@ -63,7 +67,7 @@ class OptionsTest {
                 "test-one", "high",
                 "test_two", "low"
         );
-        assertEquals(expected, options.map);
+        assertEquals(expected, options.options());
     }
 
     @Test
@@ -73,7 +77,7 @@ class OptionsTest {
                 "name", "test",
                 "verbose", ""
         );
-        assertEquals(expected, options.map);
+        assertEquals(expected, options.options());
     }
 
     @ParameterizedTest
@@ -104,13 +108,13 @@ class OptionsTest {
                 "empty", "",
                 "not-empty", "value"
         );
-        assertEquals(expected, options.map);
+        assertEquals(expected, options.options());
     }
 
     @Test
     void asMap_handlesDuplicateArguments_lastOneWins() {
         TestOptions options = new TestOptions("--name=first", "--name=last");
-        assertEquals(1, options.map.size());
-        assertEquals("last", options.map.get("name"));
+        assertEquals(1, options.options().size());
+        assertEquals("last", options.options().get("name"));
     }
 }

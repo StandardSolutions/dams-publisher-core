@@ -30,6 +30,10 @@ public class DataOptions extends Options {
                 .orElse(500);
     }
 
+    public int lockId() {
+        return this.lockTableName().hashCode();
+    }
+
     public String changeLogTableName() {
         return new SqlIdentifierSanitized(
                 map.getOrDefault("db-changelog-table-name", this.tablePrefix() + "db_changelog")
