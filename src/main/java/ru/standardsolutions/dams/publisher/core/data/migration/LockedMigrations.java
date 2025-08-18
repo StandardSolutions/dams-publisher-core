@@ -1,5 +1,5 @@
 package ru.standardsolutions.dams.publisher.core.data.migration;
 
-public interface Migration {
-    void execute();
+public interface LockedMigrations {
+
 }

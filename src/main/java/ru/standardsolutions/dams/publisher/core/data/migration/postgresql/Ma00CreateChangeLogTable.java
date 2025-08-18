@@ -2,18 +2,40 @@ package ru.standardsolutions.dams.publisher.core.data.migration.postgresql;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.standardsolutions.dams.publisher.core.data.DatabaseVoidOperation;
+import ru.standardsolutions.dams.publisher.core.data.migration.MigrationAction;
+import ru.standardsolutions.dams.publisher.core.data.options.DataOptions;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-record Do00CreateChangeLogTable(Connection connection) implements DatabaseVoidOperation {
+final class Ma00CreateChangeLogTable implements MigrationAction {
 
-    private static final Logger logger = LoggerFactory.getLogger(Do00CreateChangeLogTable.class);
+    private static final Logger logger = LoggerFactory.getLogger(Ma00CreateChangeLogTable.class);
+
+    private final DataOptions options;
+
+    public Ma00CreateChangeLogTable(DataOptions options) {
+        this.options = options;
+    }
+
 
     @Override
-    public void execute(String... args) {
-        String schema = args[0];
-        String tableName = args[1];
+    public String id() {
+        return "";
+    }
+
+    @Override
+    public String description() {
+        return "";
+    }
+
+    @Override
+    public void execute(Connection connection) throws SQLException {
+        final String schema = options.schema();
+        final String tableName = options.changeLogTableName();
+
         String sqlIsExistTable = """
                 SELECT 1 FROM pg_catalog.pg_class c
                 JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace

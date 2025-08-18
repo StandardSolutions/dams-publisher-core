@@ -7,18 +7,29 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
-public record JdbcDatabase(DataSource dataSource) implements Database {
+public final class JdbcDatabase implements Database {
 
-    @Override
-    public DbInfo info() {
+    private final DbInfo dbInfo;
+
+    public JdbcDatabase(DataSource dataSource) {
         try (Connection conn = dataSource.getConnection()) {
             DatabaseMetaData metaData = conn.getMetaData();
-            return new DbInfo(
+            this.dbInfo = new DbInfo(
                     DbType.of(metaData.getDatabaseProductName()),
                     metaData.getDatabaseProductVersion()
             );
         } catch (SQLException e) {
             throw new DataSourceException(e);
         }
+    }
+
+    @Override
+    public DbType type() {
+        return dbInfo.type();
+    }
+
+    @Override
+    public String version() {
+        return dbInfo.version();
     }
 }
