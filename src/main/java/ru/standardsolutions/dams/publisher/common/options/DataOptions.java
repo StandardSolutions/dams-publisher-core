@@ -3,6 +3,7 @@ package ru.standardsolutions.dams.publisher.common.options;
 import ru.standardsolutions.dams.publisher.common.sanitized.SqlIdentifierSanitized;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class DataOptions extends Options {
 
@@ -24,14 +25,19 @@ public class DataOptions extends Options {
         ).value();
     }
 
-    public int lockTimeout() {
-        return Optional.ofNullable(map.get("lock-timeout"))
+    /**
+     * @return lock timeout in milliseconds.
+     */
+    public int lockTimeoutMillis() {
+        return Optional.ofNullable(map.get("lock-timeout-millis"))
                 .map(Integer::parseInt)
-                .orElse(500);
+                .orElse(60_000);
     }
 
-    public int lockId() {
-        return this.lockTableName().hashCode();
+    public long lockId() {
+        return UUID
+                .nameUUIDFromBytes("dams-publisher-core".getBytes(java.nio.charset.StandardCharsets.UTF_8))
+                .getMostSignificantBits();
     }
 
     public String changeLogTableName() {
