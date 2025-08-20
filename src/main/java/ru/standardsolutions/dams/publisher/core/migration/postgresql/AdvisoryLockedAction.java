@@ -54,14 +54,14 @@ final class AdvisoryLockedAction implements MigrationAction {
 
     private void acquireLock(Connection connection) throws SQLException {
         try (var stmt = connection.prepareStatement("SELECT pg_advisory_lock(?)")) {
-            stmt.setInt(1, options.lockId());
+            stmt.setLong(1, options.lockId());
             stmt.execute();
         }
     }
 
     private void releaseLock(Connection connection) throws SQLException {
         try (var stmt = connection.prepareStatement("SELECT pg_advisory_unlock(?)")) {
-            stmt.setInt(1, options.lockId());
+            stmt.setLong(1, options.lockId());
             stmt.execute();
         }
     }

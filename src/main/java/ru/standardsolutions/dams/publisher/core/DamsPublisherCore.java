@@ -1,11 +1,16 @@
 package ru.standardsolutions.dams.publisher.core;
 
+import ru.standardsolutions.dams.publisher.common.MigrationLog;
+import ru.standardsolutions.dams.publisher.common.database.DataSourceException;
 import ru.standardsolutions.dams.publisher.common.database.JdbcDatabase;
 import ru.standardsolutions.dams.publisher.common.migration.StandardMigrationManager;
-import ru.standardsolutions.dams.publisher.core.migration.postgresql.PostgreSQLMigrationLog;
 import ru.standardsolutions.dams.publisher.common.options.DataOptions;
+import ru.standardsolutions.dams.publisher.core.migration.postgresql.PostgreSQLMigrationLog;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 
 public record DamsPublisherCore(DataSource dataSource, String... args) {
 
@@ -21,9 +26,14 @@ public record DamsPublisherCore(DataSource dataSource, String... args) {
 //            throw new UnsupportedOperationException("Unsupported database type: " + db.type());
 //        }
 
-        StandardMigrationManager migrationManager = new StandardMigrationManager(dataSource);
-        migrationManager.execute(new PostgreSQLMigrationLog(dataOptions));
+        StandardMigrationManager migrationManager = new StandardMigrationManager();
+        MigrationLog migrationLog = new PostgreSQLMigrationLog(dataOptions);
+
+        try (Connection connection = dataSource.getConnection()) {
+            migrationManager.execute(connection, migrationLog);
+        } catch (SQLException e) {
+            throw new DataSourceException("Failed to obtain connection", e);
+        }
+
     }
-
-
 }
