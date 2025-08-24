@@ -1,7 +1,7 @@
-package ru.standardsolutions.dams.publisher.core.migration.postgresql;
+package ru.standardsolutions.dams.publisher.common.migration.postgresql;
 
 import ru.standardsolutions.dams.publisher.common.AdvisoryLock;
-import ru.standardsolutions.dams.publisher.common.options.DataOptions;
+import ru.standardsolutions.dams.publisher.common.options.DamsOptions;
 
 import java.sql.*;
 import java.util.Objects;
@@ -9,11 +9,11 @@ import java.util.Objects;
 public class PgAdvisoryLock implements AdvisoryLock {
 
     private final Connection conn;
-    private final DataOptions options;
+    private final DamsOptions options;
 
-    public PgAdvisoryLock(Connection conn, DataOptions options) {
-        this.conn = Objects.requireNonNull(conn, "conn");
-        this.options = Objects.requireNonNull(options, "opts");
+    public PgAdvisoryLock(Connection conn, DamsOptions options) {
+        this.conn = Objects.requireNonNull(conn, "Connection must not be null");
+        this.options = Objects.requireNonNull(options, "Options must not be null");
     }
 
     @Override

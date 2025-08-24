@@ -1,18 +1,18 @@
 package ru.standardsolutions.dams.publisher.core.migration.postgresql;
 
-import ru.standardsolutions.dams.publisher.common.MigrationAction;
-import ru.standardsolutions.dams.publisher.common.options.DataOptions;
+import ru.standardsolutions.dams.publisher.common.MigrationStep;
+import ru.standardsolutions.dams.publisher.common.options.DamsOptions;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-final class ChangeLoggedMigration implements MigrationAction {
+final class ChangeLoggedMigration implements MigrationStep {
 
-    private final DataOptions options;
-    private final MigrationAction action;
+    private final DamsOptions options;
+    private final MigrationStep action;
 
-    public ChangeLoggedMigration(DataOptions options, MigrationAction action) {
+    public ChangeLoggedMigration(DamsOptions options, MigrationStep action) {
         this.options = options;
         this.action = action;
     }

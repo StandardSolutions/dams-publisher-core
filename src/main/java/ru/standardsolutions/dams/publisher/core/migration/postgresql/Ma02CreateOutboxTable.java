@@ -1,16 +1,16 @@
 package ru.standardsolutions.dams.publisher.core.migration.postgresql;
 
-import ru.standardsolutions.dams.publisher.common.MigrationAction;
-import ru.standardsolutions.dams.publisher.common.options.DataOptions;
+import ru.standardsolutions.dams.publisher.common.MigrationStep;
+import ru.standardsolutions.dams.publisher.common.options.DamsOptions;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-final class Ma02CreateOutboxTable implements MigrationAction {
+final class Ma02CreateOutboxTable implements MigrationStep {
 
-    private final DataOptions options;
+    private final DamsOptions options;
 
-    public Ma02CreateOutboxTable(DataOptions options) {
+    public Ma02CreateOutboxTable(DamsOptions options) {
         this.options = options;
     }
 
