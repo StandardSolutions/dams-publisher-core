@@ -2,21 +2,21 @@ package ru.standardsolutions.dams.publisher.core.migration.postgresql;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.standardsolutions.dams.publisher.common.MigrationAction;
-import ru.standardsolutions.dams.publisher.common.options.DataOptions;
+import ru.standardsolutions.dams.publisher.common.MigrationStep;
+import ru.standardsolutions.dams.publisher.common.options.DamsOptions;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-final class Ma00CreateChangeLogTable implements MigrationAction {
+final class Ma00CreateChangeLogTable implements MigrationStep {
 
     private static final Logger logger = LoggerFactory.getLogger(Ma00CreateChangeLogTable.class);
 
-    private final DataOptions options;
+    private final DamsOptions options;
 
-    public Ma00CreateChangeLogTable(DataOptions options) {
+    public Ma00CreateChangeLogTable(DamsOptions options) {
         this.options = options;
     }
 

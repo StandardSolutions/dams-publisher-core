@@ -1,19 +1,19 @@
 package ru.standardsolutions.dams.publisher.core.migration.postgresql;
 
-import ru.standardsolutions.dams.publisher.common.MigrationAction;
-import ru.standardsolutions.dams.publisher.common.options.DataOptions;
+import ru.standardsolutions.dams.publisher.common.MigrationStep;
+import ru.standardsolutions.dams.publisher.common.options.DamsOptions;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-final class AdvisoryLockedAction implements MigrationAction {
+final class AdvisoryLockedStep implements MigrationStep {
 
-    private final DataOptions options;
+    private final DamsOptions options;
 
-    private final List<MigrationAction> actions;
+    private final List<MigrationStep> actions;
 
-    public AdvisoryLockedAction(DataOptions options, MigrationAction... actions) {
+    public AdvisoryLockedStep(DamsOptions options, MigrationStep... actions) {
         this.options = options;
         this.actions = List.of(actions);
     }
@@ -33,7 +33,7 @@ final class AdvisoryLockedAction implements MigrationAction {
         acquireLock(connection);
         SQLException originalException = null;
         try {
-            for (MigrationAction action : actions) {
+            for (MigrationStep action : actions) {
                 action.execute(connection);
             }
         } catch (SQLException e) {

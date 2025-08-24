@@ -5,13 +5,13 @@ import ru.standardsolutions.dams.publisher.common.sanitized.SqlIdentifierSanitiz
 import java.util.Optional;
 import java.util.UUID;
 
-public class DataOptions extends Options {
+public class DamsOptions extends Options {
 
-    public DataOptions(String... args) {
+    public DamsOptions(String... args) {
         super(args);
     }
 
-    public DataOptions(Iterable<String> args) {
+    public DamsOptions(Iterable<String> args) {
         super(args);
     }
 

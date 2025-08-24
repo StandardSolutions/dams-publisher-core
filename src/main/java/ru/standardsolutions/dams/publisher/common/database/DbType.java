@@ -36,6 +36,6 @@ public enum DbType {
                 return type;
             }
         }
-        throw new UnsupportedDatabaseException("Supported Database Type: PostgreSQL, H2. database name:" + productName);
+        throw new UnsupportedDatabaseException("Supported Database Type: PostgreSQL, H2. Current database: " + productName);
     }
 }
