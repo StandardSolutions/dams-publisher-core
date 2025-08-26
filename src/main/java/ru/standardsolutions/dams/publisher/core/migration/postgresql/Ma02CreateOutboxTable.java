@@ -33,7 +33,7 @@ final class Ma02CreateOutboxTable implements MigrationStep {
                     CREATE TABLE IF NOT EXISTS %1$s (
                         id UUID PRIMARY KEY,
                         payload TEXT NOT NULL,
-                        type VARCHAR(255) NOT NULL,
+                        databaseType VARCHAR(255) NOT NULL,
                         recipient VARCHAR(255) NOT NULL,
                         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                         processed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -42,7 +42,7 @@ final class Ma02CreateOutboxTable implements MigrationStep {
 
             stmt.execute("""
                     CREATE INDEX IF NOT EXISTS idx_%1$s_unprocessed
-                    ON %1$s (recipient, type)
+                    ON %1$s (recipient, databaseType)
                     WHERE processed_at IS NULL
                     """.formatted(fullTableName));
 

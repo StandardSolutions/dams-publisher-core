@@ -1,11 +1,11 @@
-package ru.standardsolutions.dams.publisher.common.migration.postgresql;
+package ru.standardsolutions.dams.publisher.common.migration.h2;
 
 import ru.standardsolutions.dams.publisher.common.ChangeLog;
 import ru.standardsolutions.dams.publisher.common.MigrationStep;
 
 import java.sql.Connection;
 
-public final class PgChangeLog implements ChangeLog {
+public final class H2ChangeLog implements ChangeLog {
     @Override
     public void ensureExist(Connection c) {
 
