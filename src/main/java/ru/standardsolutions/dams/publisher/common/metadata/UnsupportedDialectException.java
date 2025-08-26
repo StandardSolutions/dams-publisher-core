@@ -1,0 +1,20 @@
+package ru.standardsolutions.dams.publisher.common.metadata;
+
+/**
+ * Exception thrown when database type is not supported
+ * or cannot be determined from JDBC URL.
+ */
+public class UnsupportedDialectException extends RuntimeException {
+    
+    public UnsupportedDialectException(String message) {
+        super(message);
+    }
+    
+    public UnsupportedDialectException(String message, Throwable cause) {
+        super(message, cause);
+    }
+    
+    public UnsupportedDialectException(Throwable cause) {
+        super(cause);
+    }
+} 

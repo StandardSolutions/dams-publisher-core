@@ -3,9 +3,9 @@ package ru.standardsolutions.dams.publisher.common;
 import java.sql.Connection;
 
 public interface ChangeLog {
-    void init(Connection c);
+    void ensureExist(Connection c);
 
-    boolean inserted(Connection c, MigrationStep migration);
+    boolean has(Connection c, MigrationStep migration);
 
-    void insert(Connection c, MigrationStep migration);
+    void append(Connection c, MigrationStep migration);
 }

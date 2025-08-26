@@ -1,4 +1,4 @@
-package ru.standardsolutions.dams.publisher.common.database;
+package ru.standardsolutions.dams.publisher.common.metadata;
 
 /**
  * Exception thrown when database type is not supported
