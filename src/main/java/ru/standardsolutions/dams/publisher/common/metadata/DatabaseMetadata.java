@@ -1,6 +1,11 @@
 package ru.standardsolutions.dams.publisher.common.metadata;
 
+import ru.standardsolutions.dams.publisher.common.Database;
+import ru.standardsolutions.dams.publisher.common.migration.h2.H2Database;
+import ru.standardsolutions.dams.publisher.common.migration.postgresql.PgDatabase;
+
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 public final class DatabaseMetadata {
@@ -10,13 +15,29 @@ public final class DatabaseMetadata {
     private final String version;
 
     public DatabaseMetadata(Connection conn) throws SQLException {
-        java.sql.DatabaseMetaData metaData = conn.getMetaData();
+        DatabaseMetaData metaData = conn.getMetaData();
         this.type = DatabaseType.of(metaData.getDatabaseProductName());
         this.version = metaData.getDatabaseProductVersion();
     }
 
     public DatabaseType type() {
         return type;
+    }
+
+    public Database database() {
+        switch (this.type) {
+            case POSTGRESQL:
+                return new PgDatabase();
+            case H2:
+                return new H2Database();
+            default:
+                throw new IllegalArgumentException(
+                    String.format(
+                        "Unsupported database type: %s", 
+                        this.type
+                    )
+                );
+        }
     }
 
     public String version() {

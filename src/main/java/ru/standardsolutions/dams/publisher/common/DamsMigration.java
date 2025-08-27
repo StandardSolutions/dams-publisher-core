@@ -1,7 +1,6 @@
 package ru.standardsolutions.dams.publisher.common;
 
 import ru.standardsolutions.dams.publisher.common.metadata.DatabaseMetadata;
-import ru.standardsolutions.dams.publisher.common.migration.postgresql.PgDatabase;
 import ru.standardsolutions.dams.publisher.common.options.DamsOptions;
 
 import javax.sql.DataSource;
@@ -21,23 +20,13 @@ public final class DamsMigration {
         this.args = args;
     }
 
-    public void init() throws SQLException {
-        try {
-            DamsOptions options = new DamsOptions(this.args);
-            MigrationLoader loader = new MigrationLoader();
-            List<MigrationStep> migrations = loader.loadMigrations(options);
-            init(migrations);
-        } catch (IOException e) {
-            throw new SQLException("Failed to load migrations from resources", e);
-        }
-    }
-
-    public void init(final List<MigrationStep> migrations) throws SQLException {
+    public void init() throws SQLException, IOException {
         DamsOptions options = new DamsOptions(this.args);
-        
+        final MigrationLoader loader = new MigrationLoader();
+        List<MigrationStep> migrations = loader.loadMigrations(options);
         try (Connection c = dataSource.getConnection()) {
             DatabaseMetadata metadata = new DatabaseMetadata(c);
-            Database db = new PgDatabase();
+            Database db = metadata.database();
             try (AdvisoryLock lock = db.newLock(c, options)) {
                 lock.acquire();
                 ChangeLog changeLog = db.changelog();
