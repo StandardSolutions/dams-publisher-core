@@ -10,18 +10,9 @@ import java.sql.Connection;
 
 public final class H2Database implements Database {
 
-    private final AdvisoryLock advisoryLock;
-
-    private final ChangeLog changeLog;
-
-    public H2Database(final AdvisoryLock advisoryLock, final ChangeLog changeLog) {
-        this.advisoryLock = advisoryLock;
-        this.changeLog = changeLog;
-    }
-
     @Override
     public AdvisoryLock newLock(Connection c, DamsOptions options) {
-        return null;
+        return new H2AdvisoryLock();
     }
 
     @Override
