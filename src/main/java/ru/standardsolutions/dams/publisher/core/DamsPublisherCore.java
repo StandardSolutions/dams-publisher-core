@@ -20,7 +20,7 @@ public record DamsPublisherCore(DataSource dataSource, String... args) {
         DamsMigration migration = new DamsMigration(dataSource, args);
 
         try {
-            migration.init(java.util.Collections.emptyList());
+            migration.init();
         } catch (SQLException e) {
             throw new DataSourceException("Failed to execute migration", e);
         }

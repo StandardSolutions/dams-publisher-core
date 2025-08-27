@@ -5,6 +5,7 @@ import ru.standardsolutions.dams.publisher.common.migration.postgresql.PgDatabas
 import ru.standardsolutions.dams.publisher.common.options.DamsOptions;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -18,6 +19,17 @@ public final class DamsMigration {
     public DamsMigration(final DataSource dataSource, final String... args) {
         this.dataSource = dataSource;
         this.args = args;
+    }
+
+    public void init() throws SQLException {
+        try {
+            DamsOptions options = new DamsOptions(this.args);
+            MigrationLoader loader = new MigrationLoader();
+            List<MigrationStep> migrations = loader.loadMigrations(options);
+            init(migrations);
+        } catch (IOException e) {
+            throw new SQLException("Failed to load migrations from resources", e);
+        }
     }
 
     public void init(final List<MigrationStep> migrations) throws SQLException {
