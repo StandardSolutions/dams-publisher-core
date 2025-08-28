@@ -27,7 +27,6 @@ public final class MigrationLoader {
         List<MigrationStep> migrations = new ArrayList<>();
         
         String migrationsPath = getMigrationsPath(options);
-        
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         URL migrationsUrl = classLoader.getResource(migrationsPath);
         
@@ -99,15 +98,24 @@ public final class MigrationLoader {
     }
 
     private String processTemplate(String content, DamsOptions options) {
-        return content
+        String result = content
                 .replace("${CHANGELOG_TABLE}", options.changeLogTableName())
                 .replace("${LOCK_TABLE}", options.lockTableName())
-                .replace("${RECIPIENT_TABLE}", options.recipientTableName())
-                .replace("${OUTBOX_TABLE}", options.outboxTableName())
-                .replace("${MESSAGE_TYPE_TABLE}", options.messageTypeTableName())
-                .replace("${RECIPIENT_MESSAGE_TYPE_TABLE}", options.recipientMessageTypeTableName())
-                .replace("${SCHEMA}", options.schema())
-                .replace("${TABLE_PREFIX}", options.tablePrefix());
+                .replace("${SCHEMA}", options.schema());
+        
+        // Process generic patterns like ${name}
+        Pattern namePattern = Pattern.compile("\\$\\{([^}]+)\\}");
+        Matcher matcher = namePattern.matcher(result);
+        StringBuffer sb = new StringBuffer();
+        
+        while (matcher.find()) {
+            String name = matcher.group(1);
+            String replacement = options.tableName(name);
+            matcher.appendReplacement(sb, replacement);
+        }
+        matcher.appendTail(sb);
+        
+        return sb.toString();
     }
 
     private static class FileMigrationStep implements MigrationStep {

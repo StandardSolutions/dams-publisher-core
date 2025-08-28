@@ -21,12 +21,12 @@ final class Ma01CreateRecipient implements MigrationStep {
 
     @Override
     public String description() {
-        return "Create recipient table: " + options.schema() + "." + options.recipientTableName();
+        return "Create recipient table: " + options.schema() + "." + options.tableName("recipient");
     }
 
     @Override
     public void execute(Connection connection) throws SQLException {
-        final String fullTableName = options.recipientTableName();
+        final String fullTableName = options.tableName("recipient");
         final String sql = """
                 CREATE TABLE IF NOT EXISTS %s (
                     id VARCHAR(255) PRIMARY KEY,

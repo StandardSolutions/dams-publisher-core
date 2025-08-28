@@ -5,6 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.postgresql.ds.PGSimpleDataSource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -15,22 +18,38 @@ import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Testcontainers
 class DamsPublisherCorePostgreSQLTest {
+
+    @Container
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
+            .withDatabaseName("postgres")
+            .withUsername("test")
+            .withPassword("test");
 
     private DataSource dataSource;
     private DamsPublisherCore damsPublisherCore;
 
     @BeforeEach
-    void setUp() {
-        // Создаем DataSource для локальной PostgreSQL базы данных
+    void setUp() throws SQLException {
+        // Создаем DataSource для TestContainers PostgreSQL базы данных
         PGSimpleDataSource pgDataSource = new PGSimpleDataSource();
-        pgDataSource.setUrl("jdbc:postgresql://localhost:5432/postgres");
-        pgDataSource.setUser("postgres");
-        pgDataSource.setPassword("postgres");
-        pgDataSource.setCurrentSchema("dams");
+        pgDataSource.setUrl(postgres.getJdbcUrl());
+        pgDataSource.setUser(postgres.getUsername());
+        pgDataSource.setPassword(postgres.getPassword());
         
+        // Создаем схему dams, если она не существует
+        try (Connection connection = pgDataSource.getConnection();
+             Statement statement = connection.createStatement()) {
+            statement.execute("CREATE SCHEMA IF NOT EXISTS dams");
+        }
+        
+        pgDataSource.setCurrentSchema("dams");
         dataSource = pgDataSource;
-        damsPublisherCore = new DamsPublisherCore(dataSource);
+        // Настраиваем имена таблиц для PostgreSQL
+        damsPublisherCore = new DamsPublisherCore(dataSource, 
+                "--recipient_table=dams_recipient", 
+                "--outbox_table=dams_outbox");
     }
 
     @AfterEach

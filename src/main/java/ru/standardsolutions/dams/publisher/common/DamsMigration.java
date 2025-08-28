@@ -22,16 +22,17 @@ public final class DamsMigration {
 
     public void init() throws SQLException, IOException {
         DamsOptions options = new DamsOptions(this.args);
-        List<MigrationStep> migrations = new MigrationLoader(options).steps();
         try (Connection c = dataSource.getConnection()) {
             DatabaseMetadata metadata = new DatabaseMetadata(c);
             Database db = metadata.database();
             try (AdvisoryLock lock = db.newLock(c, options)) {
                 lock.acquire();
+
                 ChangeLog changeLog = db.changelog();
                 changeLog.ensureExist(c);
 
-                for (MigrationStep migration : migrations) {
+                MigrationLoader migrationLoader = new MigrationLoader(options);
+                for (MigrationStep migration : migrationLoader.steps()) {
                     if (changeLog.has(c, migration)) {
                         continue;
                     }
