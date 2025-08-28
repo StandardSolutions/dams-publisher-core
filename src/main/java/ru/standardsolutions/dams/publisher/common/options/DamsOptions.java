@@ -19,12 +19,6 @@ public class DamsOptions extends Options {
         return map.getOrDefault("db-schema", "public");
     }
 
-    public String tablePrefix() {
-        return new SqlIdentifierSanitized(
-                map.getOrDefault("db-table-prefix", "dams_")
-        ).value();
-    }
-
     /**
      * @return lock timeout in milliseconds.
      */
@@ -42,41 +36,23 @@ public class DamsOptions extends Options {
 
     public String changeLogTableName() {
         return new SqlIdentifierSanitized(
-                map.getOrDefault("db-changelog-table-name", this.tablePrefix() + "db_changelog")
+                map.getOrDefault("db-changelog-table-name", "dams_3db_changelog")
         ).value();
     }
 
     public String lockTableName() {
         return new SqlIdentifierSanitized(
-                map.getOrDefault("db-lock-table-name", this.tablePrefix() + "db_lock")
-        ).value();
-    }
-
-    public String recipientTableName() {
-        return new SqlIdentifierSanitized(
-                map.getOrDefault("db-recipient-table-name", this.tablePrefix() + "recipient")
-        ).value();
-    }
-
-    public String outboxTableName() {
-        return new SqlIdentifierSanitized(
-                map.getOrDefault("db-outbox-table-name", this.tablePrefix() + "outbox")
-        ).value();
-    }
-
-    public String messageTypeTableName() {
-        return new SqlIdentifierSanitized(
-                map.getOrDefault("db-message-type-table-name", this.tablePrefix() + "message_type")
-        ).value();
-    }
-
-    public String recipientMessageTypeTableName() {
-        return new SqlIdentifierSanitized(
-                map.getOrDefault("db-recipient-message-type-table-name", this.tablePrefix() + "recipient_message_type")
+                map.getOrDefault("db-lock-table-name", "dams_db_lock")
         ).value();
     }
 
     public String migrationPath() {
         return map.getOrDefault("migration-path", "migrations");
+    }
+
+    public String tableName(String tableName) {
+        return new SqlIdentifierSanitized(
+                map.getOrDefault(tableName, tableName)
+        ).value();
     }
 }

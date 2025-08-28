@@ -15,7 +15,6 @@ import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled
 class DamsPublisherCoreH2Test {
 
     private DataSource dataSource;
@@ -29,7 +28,8 @@ class DamsPublisherCoreH2Test {
         h2DataSource.setPassword("");
         
         dataSource = h2DataSource;
-        damsPublisherCore = new DamsPublisherCore(dataSource);
+        // Используем H2-совместимые миграции
+        damsPublisherCore = new DamsPublisherCore(dataSource, "--migration-path=h2-migrations");
     }
 
     @AfterEach

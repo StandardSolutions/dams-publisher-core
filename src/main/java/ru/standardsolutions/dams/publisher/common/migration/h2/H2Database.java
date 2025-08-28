@@ -12,7 +12,7 @@ public final class H2Database implements Database {
 
     @Override
     public AdvisoryLock newLock(Connection c, DamsOptions options) {
-        return new H2AdvisoryLock();
+        return new H2AdvisoryLock(c, options);
     }
 
     @Override

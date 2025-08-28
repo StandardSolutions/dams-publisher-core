@@ -21,12 +21,12 @@ final class Ma02CreateOutboxTable implements MigrationStep {
 
     @Override
     public String description() {
-        return "Create outbox table: " + options.schema() + "." + options.outboxTableName();
+        return "Create outbox table: " + options.schema() + "." + options.tableName("outbox");
     }
 
     @Override
     public void execute(Connection connection) throws SQLException {
-        final String fullTableName = options.outboxTableName();
+        final String fullTableName = options.tableName("outbox");
 
         try (var stmt = connection.createStatement()) {
             stmt.execute("""
