@@ -17,10 +17,13 @@ public final class MigrationLoader {
 
     private static final Pattern MIGRATION_FILE_PATTERN = Pattern.compile("(\\d+)__(.+)\\.sql");
 
-    public MigrationLoader() {
+    private final DamsOptions options;
+
+    public MigrationLoader(final DamsOptions options) {
+        this.options = options;
     }
 
-    public List<MigrationStep> loadMigrations(DamsOptions options) throws IOException {
+    public List<MigrationStep> steps() throws IOException {
         List<MigrationStep> migrations = new ArrayList<>();
         
         String migrationsPath = getMigrationsPath(options);
@@ -57,8 +60,7 @@ public final class MigrationLoader {
     }
 
     private String getMigrationsPath(DamsOptions options) {
-        // Можно добавить опцию migrations-path в DamsOptions, пока используем по умолчанию
-        return "migrations";
+        return options.migrationPath();
     }
 
     private String[] findMigrationFiles(ClassLoader classLoader, String migrationsPath) {

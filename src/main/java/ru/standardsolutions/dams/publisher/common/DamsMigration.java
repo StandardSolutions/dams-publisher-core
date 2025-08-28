@@ -22,8 +22,7 @@ public final class DamsMigration {
 
     public void init() throws SQLException, IOException {
         DamsOptions options = new DamsOptions(this.args);
-        final MigrationLoader loader = new MigrationLoader();
-        List<MigrationStep> migrations = loader.loadMigrations(options);
+        List<MigrationStep> migrations = new MigrationLoader(options).steps();
         try (Connection c = dataSource.getConnection()) {
             DatabaseMetadata metadata = new DatabaseMetadata(c);
             Database db = metadata.database();

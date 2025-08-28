@@ -11,11 +11,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class MigrationLoaderTest {
 
     @Test
-    void testLoadMigrationsFromResources() throws IOException {
-        MigrationLoader loader = new MigrationLoader();
+    void testStepsFromResources() throws IOException {
         DamsOptions options = new DamsOptions();
+        MigrationLoader loader = new MigrationLoader(options);
         
-        List<MigrationStep> migrations = loader.loadMigrations(options);
+        List<MigrationStep> migrations = loader.steps();
         
         // Проверяем, что миграции загружены
         assertNotNull(migrations, "Migrations list should not be null");
@@ -32,10 +32,10 @@ class MigrationLoaderTest {
 
     @Test
     void testMigrationStepProperties() throws IOException {
-        MigrationLoader loader = new MigrationLoader();
         DamsOptions options = new DamsOptions();
+        MigrationLoader loader = new MigrationLoader(options);
         
-        List<MigrationStep> migrations = loader.loadMigrations(options);
+        List<MigrationStep> migrations = loader.steps();
         
         for (MigrationStep migration : migrations) {
             assertNotNull(migration.id(), "Migration id should not be null");
@@ -47,23 +47,30 @@ class MigrationLoaderTest {
 
     @Test
     void testCustomMigrationsPath() throws IOException {
-        MigrationLoader loader = new MigrationLoader();
-        // Создаем options с несуществующим путем (пока используем дефолтный путь)
-        DamsOptions options = new DamsOptions();
+        // Test custom migration path option
+        DamsOptions options = new DamsOptions("--migration-path=custom/migrations");
+        MigrationLoader loader = new MigrationLoader(options);
         
-        List<MigrationStep> migrations = loader.loadMigrations(options);
+        List<MigrationStep> migrations = loader.steps();
         
-        // Should load existing migrations
+        // Should return empty list for non-existent path
         assertNotNull(migrations, "Migrations list should not be null");
-        assertTrue(migrations.size() >= 0, "Should load migrations or return empty list");
+        assertEquals(0, migrations.size(), "Should return empty list for non-existent path");
+        
+        // Test default path
+        DamsOptions defaultOptions = new DamsOptions();
+        MigrationLoader defaultLoader = new MigrationLoader(defaultOptions);
+        
+        List<MigrationStep> defaultMigrations = defaultLoader.steps();
+        assertNotNull(defaultMigrations, "Default migrations list should not be null");
     }
 
     @Test
     void testTemplateProcessing() throws IOException {
-        MigrationLoader loader = new MigrationLoader();
         DamsOptions options = new DamsOptions("--db-table-prefix=test_");
+        MigrationLoader loader = new MigrationLoader(options);
         
-        List<MigrationStep> migrations = loader.loadMigrations(options);
+        List<MigrationStep> migrations = loader.steps();
         
         // Проверяем, что найдены миграции и они содержат обработанные шаблоны
         if (!migrations.isEmpty()) {
