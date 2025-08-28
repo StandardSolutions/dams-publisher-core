@@ -5,7 +5,7 @@ import ru.standardsolutions.dams.publisher.common.options.DamsOptions;
 
 import java.sql.*;
 
-public class PgAdvisoryLock implements AdvisoryLock {
+public final class PgAdvisoryLock implements AdvisoryLock {
 
     private final Connection conn;
     private final DamsOptions options;

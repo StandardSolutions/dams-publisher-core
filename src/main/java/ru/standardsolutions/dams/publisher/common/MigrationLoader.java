@@ -26,7 +26,7 @@ public final class MigrationLoader {
     public List<MigrationStep> steps() throws IOException {
         List<MigrationStep> migrations = new ArrayList<>();
         
-        String migrationsPath = getMigrationsPath(options);
+        String migrationsPath = options.migrationPath();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         URL migrationsUrl = classLoader.getResource(migrationsPath);
         
@@ -56,10 +56,6 @@ public final class MigrationLoader {
         }
         
         return migrations;
-    }
-
-    private String getMigrationsPath(DamsOptions options) {
-        return options.migrationPath();
     }
 
     private String[] findMigrationFiles(ClassLoader classLoader, String migrationsPath) {
