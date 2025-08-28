@@ -75,4 +75,8 @@ public class DamsOptions extends Options {
                 map.getOrDefault("db-recipient-message-type-table-name", this.tablePrefix() + "recipient_message_type")
         ).value();
     }
+
+    public String migrationPath() {
+        return map.getOrDefault("migration-path", "migrations");
+    }
 }
